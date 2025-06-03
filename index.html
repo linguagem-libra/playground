@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Linguagem Libra</title>
+  <!-- Prism.js CSS (tema "Tomorrow Night") -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="logo.png">
+
+</head>
+<body>
+    <header>
+        <nav>
+            <img src="logo.png" width="56px"/>
+            <ul>
+                <li><a href="https://github.com/lucasdcampos/libra" target="_blank">Baixar</a></li>
+                <li><a href="https://github.com/lucasdcampos/libra/tree/master/docs" target="_blank">Docs</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="slogan">
+        Experimente a Libra
+    </div>
+
+    <main>
+        <label for="entrada">Código de Entrada:</label>
+        <textarea
+            id="entrada"
+            placeholder="Digite o código aqui..."
+            spellcheck="false"
+        ></textarea>
+
+        <button onclick="executar()">Executar</button>
+
+        <label for="saida">Saída:</label>
+        <pre><code id="saida" class="language-javascript">(Aguardando execução...)</code></pre>
+
+    </main>
+        <footer>
+            <div class="footer-links">
+            <a href="https://github.com/lucasdcampos" target="_blank">GitHub</a>
+            <a href="https://discord.gg/WXSKVAKdkS" target="_blank">Discord</a>
+            </div>
+            <div class="footer-copy">
+                © 2024 - 2025 Lucas M. Campos.
+            </div>
+    </footer>
+
+    <!-- Prism.js -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
