@@ -4,7 +4,7 @@ function executar() {
 
   saida.textContent = 'Executando...';
 
-  fetch('https://libra-playground-api.onrender.com/executar', {
+  fetch('https://lucasof.com:5103/executar', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
