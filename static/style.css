@@ -1,0 +1,44 @@
+/* Flex container das colunas */
+.flex-row {
+    display: flex;
+    gap: 1rem;
+    height: calc(100vh - 100px); /* Ajuste para header e padding */
+}
+
+/* Cada coluna ocupa metade */
+.flex-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Textarea e output pre */
+textarea {
+    font-family: monospace;
+    flex: 1;
+    resize: none;
+    overflow-y: auto;
+}
+
+.output-box {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .flex-row {
+        flex-direction: column;
+        height: auto;
+    }
+
+    textarea, .output-box {
+        min-height: 300px;
+    }
+}
