@@ -1,3 +1,7 @@
+body {
+    background-color: #eff2f5;
+}
+
 /* Flex container das colunas */
 .flex-row {
     display: flex;
@@ -25,7 +29,6 @@ textarea {
     border: 1px solid #ced4da;
     border-radius: 5px;
     padding: 1rem;
-    flex: 1;
     overflow-y: auto;
     white-space: pre-wrap;
     font-family: monospace;
