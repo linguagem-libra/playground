@@ -21,10 +21,13 @@ const downloadButton = document.getElementById('download-button');
 const clearButton = document.getElementById('clear-button');
 const fileInput = document.getElementById('file-input');
 const output = document.getElementById('output');
+const stdinInput = document.getElementById('stdin-input');
+const stdinSendButton = document.getElementById('stdin-send-button');
 const MAX_LINES = 1000;
 const outputLines = [];
 const lineBuffer = [];
 const STORAGE_KEY = 'libraPlaygroundCode';
+let currentExecId = null;
 
 // Carrega o código salvo ou o padrão ao iniciar
 const savedCode = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +61,7 @@ downloadButton.onclick = () => {
     const blob = new Blob([code], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'script.libra';
+    a.download = 'codigo.libra';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -69,6 +72,31 @@ clearButton.onclick = () => {
     output.textContent = '';
     outputLines.length = 0;
     lineBuffer.length = 0;
+};
+
+// Função para enviar input para o servidor
+async function sendInput() {
+    const text = stdinInput.value;
+    if (text.trim() === '' || !currentExecId) return;
+
+    try {
+        await fetch('/input', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: currentExecId, text: text })
+        });
+        stdinInput.value = ''; // Limpa o campo após o envio
+    } catch (error) {
+        console.error('Erro ao enviar input:', error);
+        lineBuffer.push("[Erro ao enviar input para o servidor]");
+    }
+}
+
+stdinSendButton.onclick = sendInput;
+stdinInput.onkeydown = (e) => {
+    if (e.key === 'Enter') {
+        sendInput();
+    }
 };
 
 // Atualiza DOM a cada 50ms
@@ -106,10 +134,16 @@ runButton.onclick = async function () {
         });
 
         const data = await res.json();
+        currentExecId = data.id; // Salva o ID da execução atual
 
         if (window.eventSource) {
             window.eventSource.close();
         }
+
+        // Habilita o campo de stdin
+        stdinInput.disabled = false;
+        stdinSendButton.disabled = false;
+        stdinInput.focus();
 
         window.eventSource = new EventSource('/stream?id=' + data.id);
         window.eventSource.onmessage = function (e) {
@@ -124,6 +158,10 @@ runButton.onclick = async function () {
         window.eventSource.onerror = function () {
             window.eventSource.close();
             runButton.disabled = false;
+            // Desabilita o campo de stdin
+            stdinInput.disabled = true;
+            stdinSendButton.disabled = true;
+            currentExecId = null;
         };
     } catch (error) {
         output.textContent = 'Erro ao iniciar execução: ' + error;
