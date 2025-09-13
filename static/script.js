@@ -2,8 +2,8 @@
 const editor = CodeMirror.fromTextArea(document.getElementById('code'), {
     lineNumbers: true,
     mode: 'javascript',
-    tabSize: 4,
-    indentUnit: 4,
+    tabSize: 2,
+    indentUnit: 2,
     extraKeys: {
         Tab: (cm) => {
             if (cm.somethingSelected()) {
@@ -34,7 +34,7 @@ const savedCode = localStorage.getItem(STORAGE_KEY);
 if (savedCode !== null) {
     editor.setValue(savedCode);
 } else {
-    editor.setValue('exibir("Olá, Mundo!")');
+    editor.setValue('// Interpretador da Libra Online - Programe direto do navegador!\nexibir("Olá, Mundo!")');
 }
 
 // Garante que o estado do botão "Executar" esteja correto no carregamento
@@ -166,5 +166,34 @@ runButton.onclick = async function () {
     } catch (error) {
         output.textContent = 'Erro ao iniciar execução: ' + error;
         runButton.disabled = false;
+    }
+};
+
+// Fonte inicial
+let fontSize = parseInt(localStorage.getItem('libraFontSize')) || 16;
+const outputBox = document.getElementById('output');
+
+// Aplica o tamanho salvo
+editor.getWrapperElement().style.fontSize = fontSize + "px";
+outputBox.style.fontSize = fontSize + "px";
+editor.refresh();
+
+// Aumenta a fonte
+document.getElementById('font-increase').onclick = () => {
+    fontSize += 2;
+    editor.getWrapperElement().style.fontSize = fontSize + "px";
+    outputBox.style.fontSize = fontSize + "px";
+    editor.refresh();
+    localStorage.setItem('libraFontSize', fontSize);
+};
+
+// Diminui a fonte
+document.getElementById('font-decrease').onclick = () => {
+    if (fontSize > 8) {
+        fontSize -= 2;
+        editor.getWrapperElement().style.fontSize = fontSize + "px";
+        outputBox.style.fontSize = fontSize + "px";
+        editor.refresh();
+        localStorage.setItem('libraFontSize', fontSize);
     }
 };
