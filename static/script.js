@@ -4,6 +4,7 @@ const editor = CodeMirror.fromTextArea(document.getElementById('code'), {
     mode: 'javascript',
     tabSize: 2,
     indentUnit: 2,
+    theme: localStorage.getItem('libraTheme') || 'default',
     extraKeys: {
         Tab: (cm) => {
             if (cm.somethingSelected()) {
@@ -23,13 +24,17 @@ const fileInput = document.getElementById('file-input');
 const output = document.getElementById('output');
 const stdinInput = document.getElementById('stdin-input');
 const stdinSendButton = document.getElementById('stdin-send-button');
+const themeSelect = document.getElementById('theme-select');
+
 const MAX_LINES = 1000;
 const outputLines = [];
 const lineBuffer = [];
 const STORAGE_KEY = 'libraPlaygroundCode';
 let currentExecId = null;
 
-// Carrega o código salvo ou o padrão ao iniciar
+// -------------------------------
+// Código inicial salvo
+// -------------------------------
 const savedCode = localStorage.getItem(STORAGE_KEY);
 if (savedCode !== null) {
     editor.setValue(savedCode);
@@ -37,10 +42,12 @@ if (savedCode !== null) {
     editor.setValue('// Interpretador da Libra Online - Programe direto do navegador!\nexibir("Olá, Mundo!")');
 }
 
-// Garante que o estado do botão "Executar" esteja correto no carregamento
+// Estado inicial do botão "Executar"
 runButton.disabled = editor.getValue().trim().length === 0;
 
-// Lógica dos Botões
+// -------------------------------
+// Lógica de arquivos
+// -------------------------------
 openButton.onclick = () => {
     fileInput.click();
 };
@@ -74,7 +81,9 @@ clearButton.onclick = () => {
     lineBuffer.length = 0;
 };
 
-// Função para enviar input para o servidor
+// -------------------------------
+// Stdin
+// -------------------------------
 async function sendInput() {
     const text = stdinInput.value;
     if (text.trim() === '' || !currentExecId) return;
@@ -85,7 +94,7 @@ async function sendInput() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: currentExecId, text: text })
         });
-        stdinInput.value = ''; // Limpa o campo após o envio
+        stdinInput.value = '';
     } catch (error) {
         console.error('Erro ao enviar input:', error);
         lineBuffer.push("[Erro ao enviar input para o servidor]");
@@ -99,7 +108,9 @@ stdinInput.onkeydown = (e) => {
     }
 };
 
-// Atualiza DOM a cada 50ms
+// -------------------------------
+// Atualiza saída incremental
+// -------------------------------
 setInterval(() => {
     if (lineBuffer.length > 0) {
         outputLines.push(...lineBuffer.splice(0));
@@ -111,13 +122,18 @@ setInterval(() => {
     }
 }, 50);
 
-// Salva o código no localStorage e atualiza o estado do botão a cada mudança
+// -------------------------------
+// Persistência de código
+// -------------------------------
 editor.on('change', () => {
     const code = editor.getValue();
     runButton.disabled = code.trim().length === 0;
     localStorage.setItem(STORAGE_KEY, code);
 });
 
+// -------------------------------
+// Execução
+// -------------------------------
 runButton.onclick = async function () {
     output.textContent = '';
     outputLines.length = 0;
@@ -134,13 +150,12 @@ runButton.onclick = async function () {
         });
 
         const data = await res.json();
-        currentExecId = data.id; // Salva o ID da execução atual
+        currentExecId = data.id;
 
         if (window.eventSource) {
             window.eventSource.close();
         }
 
-        // Habilita o campo de stdin
         stdinInput.disabled = false;
         stdinSendButton.disabled = false;
         stdinInput.focus();
@@ -158,7 +173,6 @@ runButton.onclick = async function () {
         window.eventSource.onerror = function () {
             window.eventSource.close();
             runButton.disabled = false;
-            // Desabilita o campo de stdin
             stdinInput.disabled = true;
             stdinSendButton.disabled = true;
             currentExecId = null;
@@ -169,16 +183,17 @@ runButton.onclick = async function () {
     }
 };
 
-// Fonte inicial
+// -------------------------------
+// Fonte
+// -------------------------------
 let fontSize = parseInt(localStorage.getItem('libraFontSize')) || 16;
 const outputBox = document.getElementById('output');
 
-// Aplica o tamanho salvo
+// aplica tamanho inicial
 editor.getWrapperElement().style.fontSize = fontSize + "px";
 outputBox.style.fontSize = fontSize + "px";
 editor.refresh();
 
-// Aumenta a fonte
 document.getElementById('font-increase').onclick = () => {
     fontSize += 2;
     editor.getWrapperElement().style.fontSize = fontSize + "px";
@@ -187,7 +202,6 @@ document.getElementById('font-increase').onclick = () => {
     localStorage.setItem('libraFontSize', fontSize);
 };
 
-// Diminui a fonte
 document.getElementById('font-decrease').onclick = () => {
     if (fontSize > 8) {
         fontSize -= 2;
@@ -196,4 +210,15 @@ document.getElementById('font-decrease').onclick = () => {
         editor.refresh();
         localStorage.setItem('libraFontSize', fontSize);
     }
+};
+
+// -------------------------------
+// Tema do editor
+// -------------------------------
+themeSelect.value = editor.getOption('theme');
+
+themeSelect.onchange = () => {
+    const newTheme = themeSelect.value;
+    editor.setOption('theme', newTheme);
+    localStorage.setItem('libraTheme', newTheme);
 };
